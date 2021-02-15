@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="playerContainer">
     <audio-player
       v-if="isPlaying && getCurrentlyPlayingMediaType === 'Audio'"
       class="d-none"
@@ -128,9 +128,14 @@
                         <v-btn icon disabled>
                           <v-icon> mdi-cog </v-icon>
                         </v-btn>
-
-                        <v-btn icon disabled>
-                          <v-icon> mdi-fullscreen </v-icon>
+                        <v-btn icon @click="toggleFullScreen">
+                          <v-icon>
+                            {{
+                              fullScreenVideo
+                                ? 'mdi-fullscreen-exit'
+                                : 'mdi-fullscreen'
+                            }}
+                          </v-icon>
                         </v-btn>
                       </div>
                     </div>
@@ -164,7 +169,8 @@ export default Vue.extend({
     return {
       showFullScreenOverlay: false,
       fullScreenOverlayTimer: null as number | null,
-      supportedFeatures: {} as SupportedFeaturesInterface
+      supportedFeatures: {} as SupportedFeaturesInterface,
+      fullScreenVideo: false
     };
   },
   computed: {
@@ -564,6 +570,14 @@ export default Vue.extend({
           ]
         });
       }
+    },
+    toggleFullScreen(): void {
+      // @ts-expect-error - Type is incorrect $el does exist on $ref.playerContainer
+      this.$fullscreen.toggle(this.$refs.playerContainer.$el, {
+        callback: (fullscreen: boolean) => {
+          this.fullScreenVideo = fullscreen;
+        }
+      });
     }
   }
 });
