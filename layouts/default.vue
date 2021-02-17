@@ -111,7 +111,7 @@ import Vue from 'vue';
 import { mapActions, mapState, MutationPayload } from 'vuex';
 import { AppState } from '~/store';
 import { getLibraryIcon } from '~/utils/items';
-import displayPreferencesHelper from '~/mixins/displayPreferencesHelper';
+import settingsHelper from '~/mixins/settingsHelper';
 
 interface WebSocketMessage {
   MessageType: string;
@@ -125,7 +125,7 @@ interface LayoutButton {
 }
 
 export default Vue.extend({
-  mixins: [displayPreferencesHelper],
+  mixins: [settingsHelper],
   data() {
     return {
       isScrolled: false,
@@ -192,7 +192,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('userViews', ['refreshUserViews']),
-    ...mapActions('displayPreferences', ['callAllCallbacks']),
     ...mapActions('page', ['showNavDrawer']),
     handleKeepAlive(): void {
       this.$store.subscribe(

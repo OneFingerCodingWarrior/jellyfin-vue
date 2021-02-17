@@ -130,7 +130,7 @@ export default class JellyfinScheme {
     if (!user.Id) this.logout();
 
     this.$auth.setUser(user);
-    await this.$auth.ctx.app.store.dispatch('displayPreferences/initState');
+    await this.$auth.ctx.app.store.dispatch('displayPreferencesApi/initState');
   }
 
   async logout(): Promise<never> {
