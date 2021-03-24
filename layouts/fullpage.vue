@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <nuxt />
+      <nuxt keep-alive :keep-alive-props="{ max: 10 }" />
     </v-main>
     <v-footer app color="rgba(0, 0, 0, 0)">
       <locale-switcher large top />
@@ -12,14 +12,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapActions } from 'vuex';
+import settingsHelper from '~/mixins/settingsHelper';
 
 export default Vue.extend({
-  beforeMount() {
-    this.callAllCallbacks();
-  },
-  methods: {
-    ...mapActions('displayPreferences', ['callAllCallbacks'])
-  }
+  mixins: [settingsHelper]
 });
 </script>

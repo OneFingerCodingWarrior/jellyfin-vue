@@ -32,19 +32,10 @@
               'ml-1': $vuetify.breakpoint.mdAndUp
             }"
           >
-            <v-btn
-              v-if="canPlay(item)"
-              class="play-button mr-2"
-              color="primary"
-              min-width="8em"
-              :disabled="!isPlayable"
-              depressed
-              rounded
-              @click="play({ items: [item] })"
-            >
-              {{ $t('play') }}
-            </v-btn>
-            <item-menu :item="item" outlined />
+            <play-button class="mr-2" :items="[item]" />
+            <like-button :item="item" class="mr-2" />
+            <mark-played-button :item="item" class="mr-2" />
+            <item-menu :item="item" />
           </v-row>
           <v-col cols="12" md="10">
             <v-row
@@ -186,9 +177,11 @@ import {
   ImageType,
   MediaSourceInfo
 } from '@jellyfin/client-axios';
+import { Context } from '@nuxt/types';
 import imageHelper from '~/mixins/imageHelper';
 import formsHelper from '~/mixins/formsHelper';
 import itemHelper from '~/mixins/itemHelper';
+import { isValidMD5 } from '~/utils/items';
 
 interface TwoColsInfoColumn {
   lCols: number;
@@ -200,6 +193,9 @@ interface TwoColsInfoColumn {
 
 export default Vue.extend({
   mixins: [imageHelper, formsHelper, itemHelper],
+  validate(ctx: Context) {
+    return isValidMD5(ctx.route.params.itemId);
+  },
   async asyncData({ params, $api, $auth }) {
     const item = (
       await $api.userLibrary.getItem({
@@ -209,6 +205,7 @@ export default Vue.extend({
     ).data;
 
     let crew: BaseItemPerson[] = [];
+
     if (item.People) {
       crew = item.People.filter((person: BaseItemPerson) => {
         return ['Director', 'Writer'].includes(person.Type || '');
@@ -217,8 +214,9 @@ export default Vue.extend({
 
     let currentSource: MediaSourceInfo = {};
 
-    if (item.MediaSources && item.MediaSources.length > 0)
+    if (item.MediaSources && item.MediaSources.length > 0) {
       currentSource = item.MediaSources[0];
+    }
 
     return {
       item,
@@ -267,24 +265,6 @@ export default Vue.extend({
         );
       }
     },
-    isPlayable: {
-      get(): boolean {
-        // TODO: Move this to a mixin
-        if (
-          ['PhotoAlbum', 'Photo', 'Book'].includes(this.item.Type as string)
-        ) {
-          return false;
-        } else {
-          if (
-            this.item.MediaType === 'Video' &&
-            (!this.item.MediaSources || this.item.MediaSources.length === 0)
-          ) {
-            return false;
-          }
-          return true;
-        }
-      }
-    },
     actors: {
       get(): BaseItemPerson[] {
         if (this.item.People) {
@@ -315,7 +295,9 @@ export default Vue.extend({
     item: {
       handler(val: BaseItemDto): void {
         this.setPageTitle({ title: val.Name });
+
         const hash = this.getBlurhash(val, ImageType.Backdrop);
+
         this.setBackdrop({ hash });
       },
       immediate: true,
@@ -330,7 +312,6 @@ export default Vue.extend({
     this.clearBackdrop();
   },
   methods: {
-    ...mapActions('playbackManager', ['play']),
     ...mapActions('page', ['setPageTitle', 'setAppBarOpacity']),
     ...mapActions('backdrop', ['setBackdrop', 'clearBackdrop'])
   }

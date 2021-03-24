@@ -11,6 +11,7 @@ declare module '@nuxt/types' {
   interface Context {
     canPlay: (item: BaseItemDto) => boolean;
     canResume: (item: BaseItemDto) => boolean;
+    canMarkWatched: (item: BaseItemDto) => boolean;
     getItemDetailsLink: (item: BaseItemDto, overrideType?: string) => string;
     getItemIcon: (item: BaseItemDto) => string;
   }
@@ -18,6 +19,7 @@ declare module '@nuxt/types' {
   interface NuxtAppOptions {
     canPlay: (item: BaseItemDto) => boolean;
     canResume: (item: BaseItemDto) => boolean;
+    canMarkWatched: (item: BaseItemDto) => boolean;
     getItemDetailsLink: (item: BaseItemDto, overrideType?: string) => string;
     getItemIcon: (item: BaseItemDto) => string;
   }
@@ -27,6 +29,7 @@ declare module 'vue/types/vue' {
   interface Vue {
     canPlay: (item: BaseItemDto) => boolean;
     canResume: (item: BaseItemDto) => boolean;
+    canMarkWatched: (item: BaseItemDto) => boolean;
     getItemDetailsLink: (item: BaseItemDto, overrideType?: string) => string;
     getItemIcon: (item: BaseItemDto) => string;
   }
@@ -41,20 +44,25 @@ const itemHelper = Vue.extend({
      * @returns {boolean} Whether the item can be played on this client or not
      */
     canPlay(item: BaseItemDto): boolean {
-      const itemType = item.Type || '';
-      const itemMediaType = item.MediaType || '';
-
       if (
-        [
-          'MusicGenre',
-          'Season',
-          'Series',
+        item &&
+        ([
+          'Audio',
+          'AudioBook',
           'BoxSet',
+          'Episode',
+          'Movie',
           'MusicAlbum',
           'MusicArtist',
-          'Playlist'
-        ].includes(itemType) ||
-        ['Video', 'Audio'].includes(itemMediaType)
+          'MusicGenre',
+          'MusicVideo',
+          'Playlist',
+          'Season',
+          'Series',
+          'Trailer',
+          'Video'
+        ].includes(item.Type || '') ||
+          ['Video', 'Audio'].includes(item.MediaType || ''))
       ) {
         return true;
       }
@@ -72,6 +80,27 @@ const itemHelper = Vue.extend({
       }
     },
     /**
+     * Determine if an item can be mark as played
+     *
+     * @param {BaseItemDto} item - Determines if an item can be marked as played
+     * @returns {boolean} Whether the item can be mark played or not
+     */
+    canMarkWatched(item: BaseItemDto): boolean {
+      if (
+        ['Series', 'Season', 'BoxSet', 'AudioPodcast', 'AudioBook'].includes(
+          item.Type || ''
+        )
+      ) {
+        return true;
+      }
+
+      if (item.MediaType === 'Video' && item.Type !== 'TvChannel') {
+        return true;
+      }
+
+      return false;
+    },
+    /**
      * Generate a link to the item's details page route
      *
      * @param {BaseItemDto} item - The item used to generate the route
@@ -87,6 +116,7 @@ const itemHelper = Vue.extend({
         routeParams = { viewId: item.Id };
       } else {
         const type = overrideType || item.Type;
+
         switch (type) {
           case 'Series':
             routeName = 'series-itemId';

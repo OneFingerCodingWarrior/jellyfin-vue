@@ -114,13 +114,16 @@ export default Vue.extend({
           limit: this.vertical ? 5 : 12
         });
 
-        if (response.data.Items) this.relatedItems = response.data.Items;
+        if (response.data.Items) {
+          this.relatedItems = response.data.Items;
+        }
       }
 
       this.loading = false;
     },
     getImageUrl(itemId: string): string | undefined {
       const element = this.$refs.avatarImg as HTMLElement;
+
       return this.getImageUrlForElement(ImageType.Primary, { itemId, element });
     }
   }

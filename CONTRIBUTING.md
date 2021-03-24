@@ -14,7 +14,7 @@ There are several ways to contribute to Jellyfin Vue, in addition to writing cod
 
 - We are always looking for talented UI/UX designers to help us make Jellyfin look good, and to help improve user experience.  
   If you are interested in discussing this with us, the ["UI & UX" category in the Discussions tab](https://github.com/jellyfin/jellyfin-vue/discussions?discussions_q=category%3A%22UI+%26+UX%22) is a great place to start.
-- We have a [translation platform](https://translate.jellyfin.org/projects/jellyfin/jellyfin-vue/#translations), if you want to help us provide a localized version of Jellyfin in as many languages as possible.
+- We have a [translation platform](https://translate.jellyfin.org/projects/jellyfin-vue/jellyfin-vue/#translations), if you want to help us provide a localized version of Jellyfin in as many languages as possible.
 - You can [report bugs](https://github.com/jellyfin/jellyfin-vue/issues/) to help us fix issues with the client.
 
 ## Pull request process
@@ -35,8 +35,49 @@ The following should guide you through making a proper commit message:
 npx cz
 ```
 
-## Code style
+### Code style
 
 This repository uses [Prettier](https://prettier.io/) for automatically formating code. In addition, [ESLint](https://eslint.org/) rules are provided to help you enforce good practices.
 
 The project is written in [TypeScript](typescriptlang.org/), and using strongly typed code is recommended and expected, where possible.
+
+### Tests
+
+We use [Jest](https://jestjs.io/) for unit testing. For testing Vue components, usage of [vue-testing-library](https://testing-library.com/docs/vue-testing-library/intro/) is preferred.
+
+When writing tests, we follow some conventions in regards to messages:
+
+- The messages for `it()` always start with a lowercase letter
+- They describe the test case in detail
+- Only one thing is tested per test case (If you are testing multiple branches, you would have one test case per branch)
+- The `describe()` block should contain the name of the component, store or mixin being tested
+
+#### Vue components
+
+```typescript
+describe('component: ComponentName', () => {
+  it('shows the text "Lorem Ipsum"', (): void => {
+    // Your test logic goes here
+  });
+});
+```
+
+#### Mixins
+
+```typescript
+describe('mixin: myMixin', () => {
+  it('does this when passed that value', () => {
+    // Your test logic goes here
+  });
+});
+```
+
+#### Vuex stores
+
+```typescript
+describe('vuex: storeName', () => {
+  it('sets this value when myAction is dispatched', () => {
+    // Your test logic goes here
+  });
+});
+```

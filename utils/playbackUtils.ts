@@ -4,7 +4,8 @@ import {
   ItemFields,
   ItemFilter
 } from '@jellyfin/client-axios';
-import { union, uniqBy } from 'lodash';
+import union from 'lodash/union';
+import uniqBy from 'lodash/uniqBy';
 
 /**
  * Converts an item into a set of playable items for the playback manager to handle.
@@ -20,8 +21,10 @@ export async function translateItemsForPlayback(
   }
 
   let translatedItems: BaseItemDto[] = [];
+
   for (const item of items) {
     let responseItems;
+
     if (item.Type === 'Program' && item.ChannelId) {
       responseItems =
         (
@@ -110,5 +113,6 @@ export async function translateItemsForPlayback(
       }
     }
   }
+
   return uniqBy(translatedItems, 'Id');
 }

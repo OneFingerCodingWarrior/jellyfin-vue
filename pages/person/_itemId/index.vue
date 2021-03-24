@@ -75,11 +75,16 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { BaseItemDto, ImageType } from '@jellyfin/client-axios';
+import { Context } from '@nuxt/types';
 import imageHelper from '~/mixins/imageHelper';
 import timeUtils from '~/mixins/timeUtils';
+import { isValidMD5 } from '~/utils/items';
 
 export default Vue.extend({
   mixins: [imageHelper, timeUtils],
+  validate(ctx: Context) {
+    return isValidMD5(ctx.route.params.itemId);
+  },
   async asyncData({ params, $api, $auth }) {
     const item = (
       await $api.userLibrary.getItem({
@@ -154,7 +159,9 @@ export default Vue.extend({
     item: {
       handler(val: BaseItemDto): void {
         this.setPageTitle({ title: val.Name });
+
         const hash = this.getBlurhash(val, ImageType.Backdrop);
+
         this.setBackdrop({ hash });
       },
       immediate: true,
@@ -173,6 +180,7 @@ export default Vue.extend({
     ...mapActions('backdrop', ['setBackdrop', 'clearBackdrop']),
     getImageUrl(itemId: string | undefined): string | undefined {
       const element = this.$refs.personImg as HTMLElement;
+
       if (itemId) {
         return this.getImageUrlForElement(ImageType.Primary, {
           itemId,

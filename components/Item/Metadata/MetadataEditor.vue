@@ -211,7 +211,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { pick, set } from 'lodash';
+import pick from 'lodash/pick';
+import set from 'lodash/set';
 import { BaseItemDto, BaseItemPerson } from '@jellyfin/client-axios';
 
 export default Vue.extend({
@@ -241,23 +242,31 @@ export default Vue.extend({
   computed: {
     premiereDate: {
       get(): string {
-        if (!this.metadata.PremiereDate) return '';
+        if (!this.metadata.PremiereDate) {
+          return '';
+        }
+
         const dateStr = this.$dateFns.format(
           new Date(this.metadata.PremiereDate),
           'yyyy-MM-dd',
           { locale: this.$i18n.locale }
         );
+
         return dateStr;
       }
     },
     dateCreated: {
       get(): string {
-        if (!this.metadata.DateCreated) return '';
+        if (!this.metadata.DateCreated) {
+          return '';
+        }
+
         const dateStr = this.$dateFns.format(
           new Date(this.metadata.DateCreated),
           'yyyy-MM-dd',
           { locale: this.$i18n.locale }
         );
+
         return dateStr;
       }
     }
@@ -277,12 +286,14 @@ export default Vue.extend({
   methods: {
     async getData(): Promise<void> {
       await this.fetchItemInfo();
+
       const ancestors = await this.$api.library.getAncestors({
         itemId: this.metadata.Id as string,
         userId: this.$auth.user?.Id
       });
       const libraryInfo =
         ancestors.data.find((i) => i.Type === 'CollectionFolder') || {};
+
       this.getGenres(libraryInfo.Id);
     },
     async fetchItemInfo(): Promise<void> {
@@ -293,6 +304,7 @@ export default Vue.extend({
           itemId: this.itemId
         })
       ).data;
+
       this.$data.metadata = itemInfo;
     },
     async getGenres(parentId = ''): Promise<void> {
@@ -342,6 +354,7 @@ export default Vue.extend({
         'PreferredMetadataCountryCode',
         'Taglines'
       ]);
+
       try {
         this.loading = true;
         await this.$api.itemUpdate.updateItem({
@@ -379,9 +392,11 @@ export default Vue.extend({
       if (!this.metadata.People) {
         this.metadata.People = [];
       }
+
       const target = this.metadata.People?.find(
         (person) => person.Id === item.Id
       );
+
       if (target) {
         Object.assign(target, item);
       } else {

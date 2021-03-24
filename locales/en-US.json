@@ -1,5 +1,6 @@
 {
   "3DFormat": "3D format",
+  "NoMediaSourcesAvailable": "No media sources available",
   "actor": "Actor",
   "actors": "Actors",
   "addNewPerson": "Add a new person",
@@ -47,7 +48,7 @@
       "videoPlayerError": "The video player encountered an unrecoverable error."
     }
   },
-  "failedRetrievingDisplayPreferences": "Unable to get display preferences. Using defaults.",
+  "failedRetrievingDisplayPreferences": "Unable to get display preferences. Using last known settings.",
   "failedSettingDisplayPreferences": "Unable to update display preferences.",
   "failedToRefreshItems": "Failed to refresh items",
   "favorite": "Favorite",
@@ -71,7 +72,6 @@
       "noItems": "There are no recently added items to show."
     }
   },
-  "images": "Images",
   "imageType": {
     "art": "Art",
     "backdrop": "Backdrop",
@@ -85,6 +85,7 @@
     "screenshot": "Screenshot",
     "thumb": "Thumb"
   },
+  "images": "Images",
   "incorrectUsernameOrPassword": "Incorrect username or password",
   "item": {
     "artist": {
@@ -109,6 +110,7 @@
   "latestLibrary": "Latest {libraryName}",
   "libraries": "Libraries",
   "libraryEmpty": "This library is empty",
+  "libraryEmptyFilters": "No matches. Remove some filters to show more items",
   "libraryNotFound": "Library not found",
   "libraryRefreshQueued": "Library refresh queued",
   "liked": "Liked",
@@ -157,17 +159,16 @@
   "name": "Name",
   "networks": "Networks",
   "nextUp": "Next up",
-  "noAudioTracksAvailable": "No audio tracks available",
   "noAudioTrackSelected": "No audio track selected",
+  "noAudioTracksAvailable": "No audio tracks available",
   "noImagesFound": "No images found",
-  "NoMediaSourcesAvailable": "No media sources available",
   "noNetworkConnection": "No network connection",
   "noResultsFound": "There is nothing here",
-  "noSubtitlesAvailable": "No subtitles available",
   "noSubtitleSelected": "No subtitle selected",
+  "noSubtitlesAvailable": "No subtitles available",
   "noTracksAvailable": "No tracks available",
-  "noVideoTracksAvailable": "No video tracks available",
   "noVideoTrackSelected": "No video track selected",
+  "noVideoTracksAvailable": "No video tracks available",
   "numberTracks": "{number} tracks",
   "operatingSystem": "Operating system",
   "originalAspectRatio": "Original aspect ratio",
@@ -179,24 +180,24 @@
   "people": "People",
   "person": "Person",
   "play": "Play",
+  "playFromBeginning": "Play from the beginning",
   "playback": {
     "addToQueue": "Add to queue",
     "clearQueue": "Clear queue and stop playback",
     "playAll": "Play all",
+    "playNext": "Play next",
     "playbackSource": {
       "item": "Playing from {item}",
       "shuffle": "Playing in shuffle",
       "shuffleItem": "Playing {item} in shuffle",
       "unknown": "Playing from queue"
     },
-    "playNext": "Play next",
     "queueItems": "{items} tracks",
     "saveAsPlaylist": "Save queue as a playlist",
     "shuffle": "Shuffle",
     "shuffleAll": "Shuffle all"
   },
   "played": "Played",
-  "playFromBeginning": "Play from the beginning",
   "present": "Present",
   "producer": "Producer",
   "queue": "Queue",
@@ -335,6 +336,7 @@
   "status": "Status",
   "studios": "Studios",
   "subtitles": "Subtitles",
+  "syncingInProgress": "Syncing in progress",
   "tagline": "Tagline",
   "tags": "Tags",
   "themeSong": "Theme Song",
@@ -352,6 +354,7 @@
   "unableGetServerConfiguration": "Unable to get server configuration",
   "unableToRefreshLibrary": "Unable to refresh library",
   "unableToToggleLike": "Unable to change the liked status of the element",
+  "unableToTogglePlayed": "Unable to update the watch status",
   "undefined": "Undefined",
   "unexpectedError": "Unexpected error",
   "unhandledException": "Unhandled exception",
@@ -393,5 +396,10 @@
   "writing": "Writing",
   "year": "Year",
   "years": "Years",
-  "youMayAlsoLike": "You may also like"
+  "youMayAlsoLike": "You may also like",
+  "metadata": {
+    "source": "Source",
+    "sourceAll": "All",
+    "type": "Type"
+  }
 }

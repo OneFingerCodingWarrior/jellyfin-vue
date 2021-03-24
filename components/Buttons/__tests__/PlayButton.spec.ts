@@ -1,105 +1,165 @@
-import { BaseItemDto } from '@jellyfin/client-axios';
-import { mount } from '@vue/test-utils';
-import sinon from 'sinon';
-import Vuex from 'vuex';
+import '@testing-library/jest-dom';
+import { render, fireEvent } from '@testing-library/vue';
 import PlayButton from '../PlayButton.vue';
 
 const $t = (str: string): string => str;
+const mockPlay = jest.fn();
 
-const spy = sinon.spy();
-
-const actions = {
-  play: spy
-};
-
-const store = new Vuex.Store({
+const store = {
   modules: {
     playbackManager: {
       state: {},
-      actions,
+      actions: {
+        play: mockPlay
+      },
       namespaced: true
     }
   }
+};
+
+afterEach((): void => {
+  mockPlay.mockReset();
 });
 
-const wrapper = mount(PlayButton, {
-  propsData: {
-    item: {}
-  },
-  mocks: {
-    $t
-  },
-  store
-});
-
-describe('Play button', () => {
-  it('Button should be visible with text "play"', (): void => {
-    expect(wrapper.find('.v-btn').exists()).toBe(true);
-    expect(wrapper.text()).toBe('play');
-  });
-
-  it('Button should be disabled if item is not playable', (): void => {
-    expect(wrapper.find('.v-btn--disabled').exists()).toBe(true);
-    expect(wrapper.text()).toBe('play');
-  });
-
-  it('Button should not be disabled if item is playable', async (): Promise<void> => {
-    await wrapper.setProps({ item: { Type: 'MusicGenre' } as BaseItemDto });
-
-    expect(wrapper.find('.v-btn--disabled').exists()).toBe(false);
-  });
-
-  it('Button should show "resume" if item can be resumed', async (): Promise<void> => {
-    await wrapper.setProps({
-      item: { UserData: { PlaybackPositionTicks: 1 } } as BaseItemDto
+describe('component: PlayButton', () => {
+  it('shows the text "play"', (): void => {
+    const { getByRole } = render(PlayButton, {
+      props: {
+        items: []
+      },
+      mocks: {
+        $t
+      },
+      store
     });
 
-    expect(wrapper.text()).toBe('resume');
+    const button = getByRole('button');
+
+    expect(button).toHaveTextContent('play');
   });
 
-  it('When button is pressed, "play" action is called.', async (): Promise<void> => {
-    await wrapper.setProps({
-      item: {
-        Id: 'test-id-1',
-        Type: 'MusicGenre',
-        UserData: { PlaybackPositionTicks: 0 }
-      } as BaseItemDto
+  it('is disabled if the item is not playable', (): void => {
+    const { getByRole } = render(PlayButton, {
+      props: {
+        items: []
+      },
+      mocks: {
+        $t
+      },
+      store
     });
 
-    await wrapper.findComponent({ name: 'v-btn' }).trigger('click');
+    const button = getByRole('button');
 
-    expect(spy.getCall(0).args[1].items).toMatchObject([
-      {
-        Id: 'test-id-1',
-        UserData: { PlaybackPositionTicks: 0 }
-      }
-    ]);
-
-    // Since PlaybackPositionTicks = 0, item should be played not resumed
-    expect(typeof spy.getCall(0).args[1].items[0].startFromTile).toBe(
-      'undefined'
-    );
+    expect(button).toBeDisabled();
   });
 
-  it('When button is pressed, "resume" action is called.', async (): Promise<void> => {
-    spy.resetHistory();
-    await wrapper.setProps({
-      item: {
-        Id: 'test-id-2',
-        Type: 'MusicGenre',
-        UserData: { PlaybackPositionTicks: 100000000 }
-      } as BaseItemDto
+  it('is enabled if the item is playable', (): void => {
+    const { getByRole } = render(PlayButton, {
+      props: {
+        items: [
+          {
+            MediaType: 'Video'
+          }
+        ]
+      },
+      mocks: {
+        $t
+      },
+      store
     });
 
-    await wrapper.findComponent({ name: 'v-btn' }).trigger('click');
+    const button = getByRole('button');
 
-    expect(spy.getCall(0).args[1].items).toMatchObject([
-      {
-        Id: 'test-id-2',
-        UserData: { PlaybackPositionTicks: 100000000 }
-      }
-    ]);
+    expect(button).not.toBeDisabled();
+  });
 
-    expect(spy.getCall(0).args[1].startFromTime).toBe(10);
+  it('shows the text "resume" if item can be resumed', (): void => {
+    const { getByRole } = render(PlayButton, {
+      props: {
+        items: [
+          {
+            UserData: {
+              PlaybackPositionTicks: 1000
+            }
+          }
+        ]
+      },
+      mocks: {
+        $t
+      },
+      store
+    });
+
+    const button = getByRole('button');
+
+    expect(button).toHaveTextContent('resume');
+  });
+
+  it('calls the "play" action when clicked if the item is not resumable', async (): Promise<void> => {
+    const { getByRole } = render(PlayButton, {
+      props: {
+        items: [
+          {
+            MediaType: 'Video'
+          }
+        ]
+      },
+      mocks: {
+        $t
+      },
+      store
+    });
+
+    await fireEvent.click(getByRole('button'));
+
+    expect(mockPlay).toHaveBeenCalled();
+  });
+
+  it('calls the "play" action with shuffling enabled when clicked if the item is not resumable and the shuffle prop is set', async (): Promise<void> => {
+    const { getByRole } = render(PlayButton, {
+      props: {
+        items: [
+          {
+            MediaType: 'Video'
+          }
+        ],
+        shuffle: true
+      },
+      mocks: {
+        $t
+      },
+      store
+    });
+
+    await fireEvent.click(getByRole('button'));
+
+    expect(mockPlay).toHaveBeenCalled();
+    expect(mockPlay.mock.calls[0][1].startShuffled).toBeDefined();
+    expect(mockPlay.mock.calls[0][1].startShuffled).toBeTruthy();
+  });
+
+  it('calls the "resume" action when clicked if the item is resumable', async (): Promise<void> => {
+    const { getByRole } = render(PlayButton, {
+      props: {
+        items: [
+          {
+            MediaType: 'Video',
+            UserData: {
+              PlaybackPositionTicks: 1000
+            }
+          }
+        ]
+      },
+      mocks: {
+        $t
+      },
+      store
+    });
+
+    await fireEvent.click(getByRole('button'));
+
+    expect(mockPlay).toHaveBeenCalled();
+    expect(mockPlay.mock.calls[0][1].startFromTime).toBeDefined();
   });
 });

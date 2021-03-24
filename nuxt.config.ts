@@ -35,13 +35,13 @@ const config: NuxtConfig = {
   pwa: {
     meta: {
       nativeUI: true,
-      appleStatusBarStyle: 'dark',
+      appleStatusBarStyle: 'black-translucent',
       name: 'Jellyfin',
-      theme_color: '#424242'
+      theme_color: '#1c2331'
     },
     manifest: {
       name: 'Jellyfin',
-      background_color: '#101010'
+      background_color: '#14141F'
     }
   },
   /*
@@ -96,7 +96,7 @@ const config: NuxtConfig = {
    ** Auto import components
    ** See https://nuxtjs.org/api/configuration-components
    */
-  components: true,
+  components: [{ path: '~/components', pathPrefix: false }],
   /*
    ** Nuxt.js dev-modules
    */
@@ -116,13 +116,12 @@ const config: NuxtConfig = {
     [
       'nuxt-vuex-localstorage',
       {
-        localStorage: ['user', 'deviceProfile']
+        localStorage: ['user', 'deviceProfile', 'clientSettings']
       }
     ],
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
-    '@nuxtjs/auth',
-    '@nuxtjs/pwa'
+    '@nuxtjs/auth'
   ],
   /*
    ** Router configuration
@@ -261,7 +260,6 @@ const config: NuxtConfig = {
    ** See https://nuxtjs.org/api/configuration-build/
    */
   build: {
-    // @ts-expect-error -- Undocumented options
     loadingScreen: {
       image: 'icon.png',
       colors: {
@@ -270,6 +268,8 @@ const config: NuxtConfig = {
         server: '#424242'
       }
     },
+    optimizeCSS: true,
+    extractCSS: true,
     babel: {
       // envName: server, client, modern
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -313,5 +313,12 @@ const config: NuxtConfig = {
     host: '0.0.0.0'
   }
 };
+
+// Add context-dependent modules to the build
+if (process.env.NUXT_SSR) {
+  config.buildModules?.push('@nuxtjs/pwa');
+} else {
+  config.modules?.push('@nuxtjs/pwa');
+}
 
 export default config;

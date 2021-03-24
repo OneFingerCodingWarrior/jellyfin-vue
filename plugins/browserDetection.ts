@@ -51,6 +51,7 @@ class BrowserDetector {
    */
   private userAgentContains(key: string): boolean {
     const userAgent = navigator.userAgent || '';
+
     return userAgent.includes(key);
   }
 
@@ -129,6 +130,7 @@ class BrowserDetector {
     // This works for iOS Safari and desktop Safari, which contain something
     // like "Version/13.0" indicating the major Safari or iOS version.
     let match = navigator.userAgent.match(/Version\/(\d+)/);
+
     if (match) {
       return parseInt(match[1], /* base= */ 10);
     }
@@ -136,6 +138,7 @@ class BrowserDetector {
     // This works for all other browsers on iOS, which contain something like
     // "OS 13_3" indicating the major & minor iOS version.
     match = navigator.userAgent.match(/OS (\d+)(?:_\d+)?/);
+
     if (match) {
       return parseInt(match[1], /* base= */ 10);
     }
@@ -220,7 +223,7 @@ class BrowserDetector {
    */
   isWebOS1(): boolean {
     return (
-      this.isWebOS &&
+      this.isWebOS() &&
       this.userAgentContains('AppleWebKit/537') &&
       !this.userAgentContains('Chrome/')
     );
@@ -231,7 +234,7 @@ class BrowserDetector {
    */
   isWebOS2(): boolean {
     return (
-      this.isWebOS &&
+      this.isWebOS() &&
       this.userAgentContains('AppleWebKit/538') &&
       !this.userAgentContains('Chrome/')
     );
@@ -241,21 +244,21 @@ class BrowserDetector {
    * @returns {boolean} Determines if current platform is WebOS3
    */
   isWebOS3(): boolean {
-    return this.isWebOS && this.userAgentContains('Chrome/38');
+    return this.isWebOS() && this.userAgentContains('Chrome/38');
   }
 
   /**
    * @returns {boolean} Determines if current platform is WebOS4
    */
   isWebOS4(): boolean {
-    return this.isWebOS && this.userAgentContains('Chrome/53');
+    return this.isWebOS() && this.userAgentContains('Chrome/53');
   }
 
   /**
    * @returns {boolean} Determines if current platform is WebOS5
    */
   isWebOS5(): boolean {
-    return this.isWebOS && this.userAgentContains('Chrome/68');
+    return this.isWebOS() && this.userAgentContains('Chrome/68');
   }
 
   /* Platform Utilities */

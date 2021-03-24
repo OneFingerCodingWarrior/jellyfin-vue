@@ -10,6 +10,7 @@ import { AppState } from './index';
 
 export interface HomeSection {
   name: string;
+  libraryName?: string | null | undefined;
   libraryId: string;
   shape: string;
   type: string;
@@ -91,6 +92,7 @@ export const mutations: MutationTree<HomeSectionState> = {
     if (!libraryId) {
       throw new Error('libraryId is undefined');
     }
+
     Vue.set(state.latestMedia, libraryId, latestMedia);
   },
   CLEAR_HOME_SECTION(state: HomeSectionState) {

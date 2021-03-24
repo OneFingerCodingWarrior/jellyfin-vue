@@ -26,9 +26,6 @@
 <a href="https://features.jellyfin.org">
 <img alt="Feature Requests" src="https://img.shields.io/badge/fider-vote%20on%20features-success.svg"/>
 </a>
-<a href="https://forum.jellyfin.org">
-<img alt="Discuss on our Forum" src="https://img.shields.io/discourse/https/forum.jellyfin.org/users.svg"/>
-</a>
 <a href="https://matrix.to/#/+jellyfin:matrix.org">
 <img alt="Chat on Matrix" src="https://img.shields.io/matrix/jellyfin:matrix.org.svg?logo=matrix"/>
 </a>
@@ -41,7 +38,13 @@ This is an experimental web client for Jellyfin based on Vue.js. We welcome all 
 
 ## Requirements
 
-This project uses [Yarn](https://yarnpkg.com/getting-started/install) as a package manager.
+This project requires [Node 14](https://nodejs.org/en/) and uses **npm** as a package manager.
+
+You also need the following Jellyfin server version:
+
+```
+Jellyfin >=10.7.0
+```
 
 ## Contributing
 
@@ -53,31 +56,32 @@ Finally, we provide useful pre-commit hooks via [Husky](https://typicode.github.
 
 For more information about how to contribute to this project, see [CONTRIBUTING.md](https://github.com/jellyfin/jellyfin-vue/blob/master/CONTRIBUTING.md)
 
-## Pre-requirements
-
-```
-Jellyfin >=10.7.0
-```
-
 ## Build Process
 
 ```bash
 # install dependencies
-$ yarn install
+$ npm install
 
 # server with hot reload at localhost:3000
-$ yarn dev
+$ npm run dev
 
 # serve with hot reload in static mode at localhost:3000
-$ yarn dev:static
+$ npm run dev:static
+
+# build for production
+$ npm run build
+# launch server
+$ npm run start
 
 # build for production and launch server
-$ yarn build
-$ yarn start
+$ npm run prod
 
 # build for production in static mode
 # you will need a web server to host the client
-$ yarn build:static
+$ npm run build:static
+
+# build for production in static mode and run server
+$ npm run prod:static
 
 ```
 
@@ -87,17 +91,17 @@ When using the SSR version of the client, you can run the client in standalone m
 
 ```bash
 # install dependencies
-$ yarn install
+$ npm install
 
 # build for production in standalone mode, with server-side rendering
-$ yarn build --standalone
+$ npm run build:standalone
 
 # move the server and required files to a dedicated directory
 $ mkdir -p /opt/jellyfin-vue
-$ cp .nuxt .docker/nuxt.config.js .docker/package.json /opt/jellyfin-vue
+$ cp -r .nuxt .docker/nuxt.config.js .docker/package.json /opt/jellyfin-vue
 
 # install the required dependency and start the client
 $ cd /opt/jellyfin-vue
-$ yarn install
-$ yarn start
+$ npm install
+$ npm run start
 ```

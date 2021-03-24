@@ -1,87 +1,80 @@
-name: Main
+name: Code quality
 
 on:
   push:
     branches:
-      - main
       - master
   pull_request:
     branches:
-      - main
       - master
+  workflow_dispatch:
 
 jobs:
   lint:
-    name: ESLint
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [14]
+    name: Lint
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
 
-      - name: Setup node env
-        uses: actions/setup-node@v2.1.4
+      - name: Setup node environment
+        uses: actions/setup-node@v2.1.5
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 14
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Get npm cache directory path
+        id: npm-cache-dir-path
+        run: echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Cache node_modules
         uses: actions/cache@v2.1.4
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        id: npm-cache
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ steps.npm-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci --no-audit
 
       - name: Run linter
-        run: yarn lint
-  jest:
-    name: Jest
-    runs-on: ${{ matrix.os }}
+        run: npm run lint
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [14]
+  test:
+    name: Test
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@master
-
-      - name: Setup node env
-        uses: actions/setup-node@v2.1.4
+        uses: actions/checkout@v2
         with:
-          node-version: ${{ matrix.node }}
+          fetch-depth: 0
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Setup node environment
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: 14
+
+      - name: Get npm cache directory path
+        id: npm-cache-dir-path
+        run: echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Cache node_modules
         uses: actions/cache@v2.1.4
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        id: npm-cache
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ steps.npm-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci --no-audit
 
       - name: Run tests
-        run: yarn test
+        run: npm run test
+
       - name: Upload coverage
         uses: codecov/codecov-action@v1

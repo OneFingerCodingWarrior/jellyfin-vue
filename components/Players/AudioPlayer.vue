@@ -12,7 +12,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { stringify } from 'qs';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 // @ts-expect-error - This module doesn't have typings
 import muxjs from 'mux.js';
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -35,7 +35,9 @@ export default Vue.extend({
       playbackInfo: {} as PlaybackInfoResponse,
       source: '',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      player: null as any
+      player: null as any,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      unsubscribe(): void {}
     };
   },
   computed: {
@@ -71,45 +73,52 @@ export default Vue.extend({
 
       window.muxjs = muxjs;
       shaka.polyfill.installAll();
+
       if (shaka.Player.isBrowserSupported()) {
         this.player = new shaka.Player(this.$refs.audioPlayer);
         // Register player events
         this.player.addEventListener('error', this.onPlayerError);
         // Subscribe to Vuex actions
-        this.$store.subscribe((mutation, _state: AppState) => {
-          switch (mutation.type) {
-            case 'playbackManager/PAUSE_PLAYBACK':
-              if (this.$refs.audioPlayer) {
-                (this.$refs.audioPlayer as HTMLAudioElement).pause();
-              }
-              break;
-            case 'playbackManager/UNPAUSE_PLAYBACK':
-              if (this.$refs.audioPlayer) {
-                (this.$refs.audioPlayer as HTMLAudioElement).play();
-              }
-              break;
-            case 'playbackManager/CHANGE_CURRENT_TIME':
-              if (this.$refs.audioPlayer) {
-                (this.$refs
-                  .audioPlayer as HTMLAudioElement).currentTime = this.currentTime;
-              }
-              break;
-            case 'playbackManager/SET_VOLUME':
-              if (this.$refs.audioPlayer) {
-                (this.$refs.audioPlayer as HTMLAudioElement).volume =
-                  this.currentVolume / 100;
-              }
-              break;
-            case 'playbackManager/SET_REPEAT_MODE':
-              if (this.$refs.audioPlayer) {
-                if (mutation?.payload?.mode === RepeatMode.RepeatOne) {
-                  (this.$refs.audioPlayer as HTMLAudioElement).loop = true;
-                } else {
-                  (this.$refs.audioPlayer as HTMLAudioElement).loop = false;
+        this.unsubscribe = this.$store.subscribe(
+          (mutation, _state: AppState) => {
+            switch (mutation.type) {
+              case 'playbackManager/PAUSE_PLAYBACK':
+                if (this.$refs.audioPlayer) {
+                  (this.$refs.audioPlayer as HTMLAudioElement).pause();
                 }
-              }
+
+                break;
+              case 'playbackManager/UNPAUSE_PLAYBACK':
+                if (this.$refs.audioPlayer) {
+                  (this.$refs.audioPlayer as HTMLAudioElement).play();
+                }
+
+                break;
+              case 'playbackManager/CHANGE_CURRENT_TIME':
+                if (this.$refs.audioPlayer) {
+                  (this.$refs
+                    .audioPlayer as HTMLAudioElement).currentTime = this.currentTime;
+                }
+
+                break;
+              case 'playbackManager/SET_VOLUME':
+                if (this.$refs.audioPlayer) {
+                  (this.$refs.audioPlayer as HTMLAudioElement).volume =
+                    this.currentVolume / 100;
+                }
+
+                break;
+              case 'playbackManager/SET_REPEAT_MODE':
+                if (this.$refs.audioPlayer) {
+                  if (mutation?.payload?.mode === RepeatMode.RepeatOne) {
+                    (this.$refs.audioPlayer as HTMLAudioElement).loop = true;
+                  } else {
+                    (this.$refs.audioPlayer as HTMLAudioElement).loop = false;
+                  }
+                }
+            }
           }
-        });
+        );
       } else {
         this.$nuxt.error({
           message: this.$t('browserNotSupported') as string
@@ -130,6 +139,8 @@ export default Vue.extend({
       this.player.unload();
       this.player.destroy();
     }
+
+    this.unsubscribe();
   },
   methods: {
     ...mapActions('snackbar', ['pushSnackbarMessage']),
@@ -155,6 +166,7 @@ export default Vue.extend({
         this.setPlaySessionId({ id: this.playbackInfo.PlaySessionId });
 
         let mediaSource;
+
         if (this.playbackInfo?.MediaSources) {
           mediaSource = this.playbackInfo.MediaSources[0];
           this.setMediaSource({ mediaSource });
@@ -182,6 +194,7 @@ export default Vue.extend({
           }
 
           const params = stringify(directOptions);
+
           this.source = `${this.$axios.defaults.baseURL}/Audio/${mediaSource.Id}/stream.${mediaSource.Container}?${params}`;
         } else if (
           mediaSource.SupportsTranscoding &&
@@ -211,6 +224,7 @@ export default Vue.extend({
       if (this.$refs.audioPlayer) {
         const currentTime = (this.$refs.audioPlayer as HTMLAudioElement)
           .currentTime;
+
         this.setCurrentTime({ time: currentTime });
         this.pause();
       }
@@ -219,6 +233,7 @@ export default Vue.extend({
       if (this.$refs.audioPlayer) {
         const currentTime = (this.$refs.audioPlayer as HTMLAudioElement)
           .currentTime;
+
         this.setCurrentTime({ time: currentTime });
         this.setNextTrack();
       }

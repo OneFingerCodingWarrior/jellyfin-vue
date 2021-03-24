@@ -12,6 +12,7 @@
             v-model="login.username"
             outlined
             hide-details
+            autocomplete="username"
             :label="$t('username')"
             :error-messages="errors"
           />
@@ -21,6 +22,7 @@
           outlined
           hide-details
           class="mt-4"
+          autocomplete="current-password"
           :label="$t('password')"
           :append-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
           :type="showPassword ? 'text' : 'password'"
@@ -60,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { UserDto } from '@jellyfin/client-axios';
@@ -101,7 +103,8 @@ export default Vue.extend({
       }
 
       this.loading = true;
-      this.setDeviceProfile();
+      await this.setDeviceProfile();
+
       try {
         await this.loginRequest(this.login);
         this.$router.replace('/');

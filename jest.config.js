@@ -14,6 +14,7 @@ module.exports = {
     '<rootDir>/components/**/*.vue',
     '<rootDir>/layouts/**/*.vue',
     '<rootDir>/middleware/**/*.vue',
+    '<rootDir>/middleware/**/*.ts',
     '<rootDir>/mixins/**/*.vue',
     '<rootDir>/mixins/**/*.ts',
     '<rootDir>/pages/**/*.vue',
@@ -24,5 +25,5 @@ module.exports = {
   ],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
   setupFiles: ['jest-canvas-mock', './jest.setup.ts'],
-  coverageReporters: ['text', 'cobertura']
+  coverageReporters: ['text', 'cobertura', 'html', 'lcov']
 };

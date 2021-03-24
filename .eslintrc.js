@@ -7,10 +7,10 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:jsdoc/recommended',
+    'plugin:json/recommended',
     'plugin:@typescript-eslint/recommended',
     '@nuxtjs/eslint-config-typescript',
     'prettier',
-    'prettier/vue',
     'plugin:prettier/recommended',
     'plugin:promise/recommended',
     'plugin:nuxt/recommended',
@@ -18,7 +18,7 @@ module.exports = {
     'plugin:import/warnings',
     'plugin:import/typescript'
   ],
-  plugins: ['prettier', 'promise', 'import', 'jsdoc'],
+  plugins: ['prettier', 'promise', 'import', 'jsdoc', 'lodash'],
   rules: {
     'import/newline-after-import': 'error',
     'import/order': 'error',
@@ -28,7 +28,9 @@ module.exports = {
     'promise/prefer-await-to-callbacks': 'error',
     'promise/prefer-await-to-then': 'error',
     '@typescript-eslint/explicit-function-return-type': 'error',
+    '@typescript-eslint/prefer-ts-expect-error': 'error',
     'prefer-arrow-callback': 'error',
+    curly: 'error',
     // Force some component order stuff, formatting and such, for consistency
     'vue/component-name-in-template-casing': [
       'error',
@@ -50,7 +52,46 @@ module.exports = {
         }
       }
     ],
-    'vue/multiline-html-element-content-newline': 'error'
+    'vue/multiline-html-element-content-newline': 'error',
+    'padding-line-between-statements': [
+      'error',
+      // Always require blank lines after directives (like 'use-strict'), except between directives
+      { blankLine: 'always', prev: 'directive', next: '*' },
+      { blankLine: 'any', prev: 'directive', next: 'directive' },
+      // Always require blank lines after import, except between imports
+      { blankLine: 'always', prev: 'import', next: '*' },
+      { blankLine: 'any', prev: 'import', next: 'import' },
+      // Always require blank lines before and after every sequence of variable declarations and export
+      {
+        blankLine: 'always',
+        prev: '*',
+        next: ['const', 'let', 'var', 'export']
+      },
+      {
+        blankLine: 'always',
+        prev: ['const', 'let', 'var', 'export'],
+        next: '*'
+      },
+      {
+        blankLine: 'any',
+        prev: ['const', 'let', 'var', 'export'],
+        next: ['const', 'let', 'var', 'export']
+      },
+      // Always require blank lines before and after class declaration, if, do/while, switch, try
+      {
+        blankLine: 'always',
+        prev: '*',
+        next: ['if', 'class', 'for', 'do', 'while', 'switch', 'try']
+      },
+      {
+        blankLine: 'always',
+        prev: ['if', 'class', 'for', 'do', 'while', 'switch', 'try'],
+        next: '*'
+      },
+      // Always require blank lines before return statements
+      { blankLine: 'always', prev: '*', next: 'return' }
+    ],
+    'lodash/import-scope': ['error', 'method']
   },
   settings: {
     'import/resolver': {
@@ -58,5 +99,22 @@ module.exports = {
         extensions: ['.js', '.ts', '.vue', '.json']
       }
     }
-  }
+  },
+  overrides: [
+    {
+      files: ['**/*.spec.ts'],
+      plugins: ['jest', 'jest-formatting'],
+      env: {
+        'jest/globals': true
+      },
+      extends: [
+        'plugin:jest/recommended',
+        'plugin:jest/style',
+        'plugin:jest-formatting/strict'
+      ],
+      rules: {
+        'jest/consistent-test-it': ['error']
+      }
+    }
+  ]
 };

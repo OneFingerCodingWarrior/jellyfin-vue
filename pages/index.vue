@@ -15,18 +15,24 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
-import { pickBy } from 'lodash';
+import pickBy from 'lodash/pickBy';
 import { BaseItemDto } from '@jellyfin/client-axios';
 import { getShapeFromCollectionType } from '~/utils/items';
 import { HomeSection } from '~/store/homeSection';
 
 export default Vue.extend({
-  async asyncData({ store, app }) {
+  data() {
+    return {
+      homeSections: [] as HomeSection[]
+    };
+  },
+  async fetch() {
     const validSections = ['resume', 'resumeaudio', 'upnext', 'latestmedia'];
 
     // Filter for valid sections in Jellyfin Vue
+    // TODO: Implement custom section order
     let homeSectionsArray = pickBy(
-      store.state.displayPreferences.CustomPrefs,
+      this.$store.state.clientSettings.CustomPrefs,
       (value: string, key: string) => {
         return (
           value &&
@@ -55,7 +61,7 @@ export default Vue.extend({
       switch (homeSection) {
         case 'librarytiles': {
           homeSections.push({
-            name: app.i18n.t('libraries'),
+            name: 'libraries',
             libraryId: '',
             shape: 'thumb-card',
             type: 'libraries'
@@ -65,11 +71,11 @@ export default Vue.extend({
         case 'latestmedia': {
           const latestMediaSections = [];
 
-          let userViews: BaseItemDto[] = store.state.userViews.views;
+          let userViews: BaseItemDto[] = this.$store.state.userViews.views;
 
           if (!userViews.length) {
-            await store.dispatch('userViews/refreshUserViews');
-            userViews = await store.state.userViews.views;
+            await this.$store.dispatch('userViews/refreshUserViews');
+            userViews = await this.$store.state.userViews.views;
           }
 
           if (userViews) {
@@ -88,9 +94,8 @@ export default Vue.extend({
               }
 
               latestMediaSections.push({
-                name: app.i18n.t('latestLibrary', {
-                  libraryName: userView.Name
-                }),
+                name: 'latestLibrary',
+                libraryName: userView.Name,
                 libraryId: userView.Id || '',
                 shape: getShapeFromCollectionType(userView.CollectionType),
                 type: 'latestmedia'
@@ -99,11 +104,12 @@ export default Vue.extend({
 
             homeSections.push(...latestMediaSections);
           }
+
           break;
         }
         case 'resume':
           homeSections.push({
-            name: app.i18n.t('continueWatching'),
+            name: 'continueWatching',
             libraryId: '',
             shape: 'thumb-card',
             type: 'resume'
@@ -111,7 +117,7 @@ export default Vue.extend({
           break;
         case 'resumeaudio':
           homeSections.push({
-            name: app.i18n.t('continueListening'),
+            name: 'continueListening',
             libraryId: '',
             shape: 'square-card',
             type: 'resumeaudio'
@@ -119,7 +125,7 @@ export default Vue.extend({
           break;
         case 'upnext':
           homeSections.push({
-            name: app.i18n.t('nextUp'),
+            name: 'nextUp',
             libraryId: '',
             shape: 'thumb-card',
             type: 'upnext'
@@ -130,12 +136,7 @@ export default Vue.extend({
       }
     }
 
-    return { homeSections };
-  },
-  data() {
-    return {
-      homeSections: [] as HomeSection[]
-    };
+    this.homeSections = homeSections;
   },
   head() {
     return {
@@ -146,7 +147,18 @@ export default Vue.extend({
     this.setPageTitle({ title: this.$t('home') });
     this.setAppBarOpacity({ opaqueAppBar: false });
   },
+  activated() {
+    if (this.$fetchState.timestamp <= Date.now() - 30000) {
+      this.$fetch();
+    }
+
+    this.setPageTitle({ title: this.$t('home') });
+    this.setAppBarOpacity({ opaqueAppBar: false });
+  },
   destroyed() {
+    this.setAppBarOpacity({ opaqueAppBar: true });
+  },
+  deactivated() {
     this.setAppBarOpacity({ opaqueAppBar: true });
   },
   methods: {

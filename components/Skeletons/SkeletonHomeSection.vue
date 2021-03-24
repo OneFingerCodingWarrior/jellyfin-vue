@@ -1,6 +1,6 @@
 <template>
   <v-col>
-    <v-skeleton-loader type="heading" max-width="25em" />
+    <v-skeleton-loader type="heading" max-width="25em" class="ml-2" />
     <v-row class="space-around ma-0">
       <skeleton-card
         v-for="i in cardNumber"
@@ -36,6 +36,7 @@ export default Vue.extend({
       } else if (this.$vuetify.breakpoint.width < 1904) {
         return this.cardShape === 'thumb-card' ? 4 : 8;
       }
+
       return 4;
     }
   }

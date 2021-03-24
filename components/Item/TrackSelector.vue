@@ -94,7 +94,10 @@ export default Vue.extend({
        * @returns {MediaStream[]} List of MediaStream of the specified type
        */
       get(): MediaStream[] {
-        if (!this.mediaSourceItem.MediaStreams) return [];
+        if (!this.mediaSourceItem.MediaStreams) {
+          return [];
+        }
+
         return this.mediaSourceItem.MediaStreams.filter(
           (mediaStream) => mediaStream.Type === this.type
         );
@@ -117,8 +120,14 @@ export default Vue.extend({
        * @returns {boolean} Whether to disable the v-select
        */
       get(): boolean {
-        if (this.tracks.length <= 0) return true;
-        if (this.type !== 'Subtitle' && this.tracks.length <= 1) return true;
+        if (this.tracks.length <= 0) {
+          return true;
+        }
+
+        if (this.type !== 'Subtitle' && this.tracks.length <= 1) {
+          return true;
+        }
+
         return false;
       }
     },
@@ -127,18 +136,30 @@ export default Vue.extend({
        * @returns {string} Placeholder to use
        */
       get(): string {
-        if (this.type === 'Audio' && this.tracks.length === 0)
+        if (this.type === 'Audio' && this.tracks.length === 0) {
           return this.$t('noAudioTracksAvailable');
-        if (this.type === 'Audio' && this.tracks.length !== 0)
+        }
+
+        if (this.type === 'Audio' && this.tracks.length !== 0) {
           return this.$t('noAudioTrackSelected');
-        if (this.type === 'Subtitle' && this.tracks.length === 0)
+        }
+
+        if (this.type === 'Subtitle' && this.tracks.length === 0) {
           return this.$t('noSubtitlesAvailable');
-        if (this.type === 'Subtitle' && this.tracks.length !== 0)
+        }
+
+        if (this.type === 'Subtitle' && this.tracks.length !== 0) {
           return this.$t('noSubtitleSelected');
-        if (this.type === 'Video' && this.tracks.length === 0)
+        }
+
+        if (this.type === 'Video' && this.tracks.length === 0) {
           return this.$t('noVideoTracksAvailable');
-        if (this.type === 'Video' && this.tracks.length !== 0)
+        }
+
+        if (this.type === 'Video' && this.tracks.length !== 0) {
           return this.$t('noVideoTrackSelected');
+        }
+
         return this.$t('noTracksAvailable');
       }
     },
@@ -156,8 +177,13 @@ export default Vue.extend({
     defaultIndex: {
       get(): number | undefined {
         const defaultTrack = this.tracks.findIndex((track) => track.IsDefault);
-        if (defaultTrack !== -1) return defaultTrack;
-        else if (this.type === 'Subtitle') return undefined;
+
+        if (defaultTrack !== -1) {
+          return defaultTrack;
+        } else if (this.type === 'Subtitle') {
+          return undefined;
+        }
+
         return 0;
       }
     }
@@ -194,7 +220,10 @@ export default Vue.extend({
      * @returns {string} Text to display in select when track is choosen
      */
     getTrackSelection(track: MediaStream): string {
-      if (track.DisplayTitle) return track.DisplayTitle;
+      if (track.DisplayTitle) {
+        return track.DisplayTitle;
+      }
+
       return '';
     },
     /**
@@ -202,8 +231,10 @@ export default Vue.extend({
      * @returns {string|undefined} Optional icon to use for the track line in the v-select menu
      */
     getTrackIcon(track: MediaStream): string | undefined {
-      if (this.type === 'Audio' && track.ChannelLayout)
+      if (this.type === 'Audio' && track.ChannelLayout) {
         return this.getSurroundIcon(track.ChannelLayout);
+      }
+
       return undefined;
     },
     /**
@@ -211,7 +242,10 @@ export default Vue.extend({
      * @returns {string} Text to use for the track line in the v-select menu
      */
     getTrackTitle(track: MediaStream): string {
-      if (track.DisplayTitle) return track.DisplayTitle;
+      if (track.DisplayTitle) {
+        return track.DisplayTitle;
+      }
+
       return '';
     },
     /**
@@ -219,10 +253,14 @@ export default Vue.extend({
      * @returns {string|undefined} Optional subtitle to use for the track line in the v-select menu
      */
     getTrackSubtitle(track: MediaStream): string | undefined {
-      if ((this.type === 'Audio' || this.type === 'Subtitle') && track.Language)
+      if (
+        (this.type === 'Audio' || this.type === 'Subtitle') &&
+        track.Language
+      ) {
         return this.getLanguageName(track.Language);
-      else if (this.type === 'Audio' || this.type === 'Subtitle')
+      } else if (this.type === 'Audio' || this.type === 'Subtitle') {
         return this.$t('undefined');
+      }
 
       return undefined;
     },

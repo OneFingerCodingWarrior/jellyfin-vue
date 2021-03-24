@@ -29,28 +29,19 @@
       <filter-button
         v-if="isSortable"
         :collection-info="collectionInfo"
-        :disabled="loading"
+        :disabled="loading || (!items.length && !hasFilters)"
         :items-type="viewType"
         @change="onChangeFilter"
       />
       <v-spacer />
-      <global-playback-button
-        v-if="isQueueable"
-        :items="items"
-        :disabled="loading || !items.length"
-        shuffle
-      />
-      <global-playback-button
-        v-if="isQueueable"
-        :items="items"
-        :disabled="loading || !items.length"
-      />
+      <play-button :items="items" shuffle />
+      <play-button :items="items" />
     </v-app-bar>
     <v-container class="after-second-toolbar">
       <skeleton-item-grid v-if="loading" :view-type="viewType" />
       <item-grid :loading="loading" :items="items">
         <h1 v-if="!hasFilters && isDefaultView" class="text-h5">
-          {{ $t('libraryEmpty') }}
+          {{ hasFilters ? $t('libraryEmptyFilters') : $t('libraryEmpty') }}
         </h1>
       </item-grid>
     </v-container>
@@ -61,9 +52,13 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { BaseItemDto } from '@jellyfin/client-axios';
-import { validLibraryTypes } from '~/utils/items';
+import { Context } from '@nuxt/types';
+import { isValidMD5, validLibraryTypes } from '~/utils/items';
 
 export default Vue.extend({
+  validate(ctx: Context) {
+    return isValidMD5(ctx.route.params.viewId);
+  },
   async asyncData({ params, $api, $auth }) {
     const collectionInfo = (
       await $api.items.getItems({
@@ -130,16 +125,6 @@ export default Vue.extend({
         return true;
       } else {
         return false;
-      }
-    },
-    isQueueable(): boolean {
-      switch (this.viewType) {
-        case 'MusicAlbum':
-          return true;
-        case 'MusicGenre':
-          return true;
-        default:
-          return false;
       }
     }
   },
@@ -211,7 +196,7 @@ export default Vue.extend({
       this.sortBy = sort;
     },
     onChangeFilter(filter: Record<string, [string]>): boolean | void {
-      this.hasFilters = Object.values(filter).every((value) => {
+      this.hasFilters = Object.values(filter).some((value) => {
         return value.length > 0;
       });
 
@@ -252,6 +237,7 @@ export default Vue.extend({
     async refreshItems(): Promise<void> {
       try {
         let itemsResponse;
+
         switch (this.viewType) {
           case 'MusicArtist':
             itemsResponse = (

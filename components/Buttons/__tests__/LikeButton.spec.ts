@@ -5,7 +5,7 @@ import Vuex, { Store } from 'vuex';
 import Vue from 'vue';
 import LikeButton from '../LikeButton.vue';
 
-describe('Like button', () => {
+describe('component: LikeButton', () => {
   const localVue = createLocalVue();
   let vuetify: Vuetify;
   let store: Store<unknown>;
@@ -14,10 +14,6 @@ describe('Like button', () => {
   beforeEach(() => {
     vuetify = new Vuetify();
     store = new Vuex.Store({});
-  });
-
-  // Item is 'favorited'
-  it('Heart outline is shown when item is not favorited', (): void => {
     wrapper = mount(LikeButton, {
       localVue,
       vuetify,
@@ -26,7 +22,10 @@ describe('Like button', () => {
         item: {} as BaseItemDto
       }
     });
+  });
 
+  // Item is 'favorited'
+  it('shows a heart outline icon when the item is not favorited', (): void => {
     expect(wrapper.find('.mdi').exists()).toBe(true);
     expect(wrapper.find('.mdi-heart-outline').exists()).toBe(true);
     expect(wrapper.find('.v-btn--icon').exists()).toBe(true);
@@ -34,31 +33,21 @@ describe('Like button', () => {
   });
 
   // Item is not 'favorited'
-  it('Solid heart is shown when item is favorited', (): void => {
-    wrapper = mount(LikeButton, {
-      localVue,
-      vuetify,
-      store,
-      propsData: {
-        item: { UserData: { IsFavorite: true } } as BaseItemDto
-      }
+  it('shows a heart icon when the item is favorited', async (): Promise<void> => {
+    await wrapper.setProps({
+      item: { UserData: { IsFavorite: true } } as BaseItemDto
     });
 
     expect(wrapper.find('.mdi').exists()).toBe(true);
     expect(wrapper.find('.mdi-heart').exists()).toBe(true);
     expect(wrapper.find('.v-btn--icon').exists()).toBe(true);
-    expect(wrapper.find('.red--text').exists()).toBe(true);
   });
 
-  it('Icon updates when props change', async (): Promise<void> => {
-    wrapper = mount(LikeButton, {
-      localVue,
-      vuetify,
-      store,
-      propsData: {
-        item: { UserData: { IsFavorite: false } } as BaseItemDto
-      }
+  it('updates the icon when the IsFavorite user data is changed', async (): Promise<void> => {
+    await wrapper.setProps({
+      item: { UserData: { IsFavorite: false } } as BaseItemDto
     });
+
     expect(wrapper.find('.mdi-heart-outline').exists()).toBe(true);
 
     await wrapper.setProps({

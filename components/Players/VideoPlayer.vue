@@ -15,7 +15,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { stringify } from 'qs';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 // @ts-expect-error - This module doesn't have typings
 import muxjs from 'mux.js';
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -44,7 +44,9 @@ export default Vue.extend({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       player: null as any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ui: null as any
+      ui: null as any,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      unsubscribe(): void {}
     };
   },
   computed: {
@@ -84,40 +86,46 @@ export default Vue.extend({
 
       window.muxjs = muxjs;
       shaka.polyfill.installAll();
+
       if (shaka.Player.isBrowserSupported()) {
         this.player = new shaka.Player(this.$refs.videoPlayer);
 
         // Register player events
         this.player.addEventListener('error', this.onPlayerError);
         // Subscribe to Vuex actions
-        this.$store.subscribe((mutation, _state: AppState) => {
-          switch (mutation.type) {
-            case 'playbackManager/PAUSE_PLAYBACK':
-              if (this.$refs.videoPlayer) {
-                (this.$refs.videoPlayer as HTMLVideoElement).pause();
-              }
-              break;
-            case 'playbackManager/UNPAUSE_PLAYBACK':
-              if (this.$refs.videoPlayer) {
-                (this.$refs.videoPlayer as HTMLVideoElement).play();
-              }
-              break;
-            case 'playbackManager/CHANGE_CURRENT_TIME':
-              if (this.$refs.videoPlayer && mutation?.payload?.time) {
-                (this.$refs.videoPlayer as HTMLVideoElement).currentTime =
-                  mutation?.payload?.time;
-              }
-              break;
-            case 'playbackManager/SET_REPEAT_MODE':
-              if (this.$refs.videoPlayer) {
-                if (mutation?.payload?.mode === RepeatMode.RepeatOne) {
-                  (this.$refs.videoPlayer as HTMLVideoElement).loop = true;
-                } else {
-                  (this.$refs.videoPlayer as HTMLVideoElement).loop = false;
+        this.unsubscribe = this.$store.subscribe(
+          (mutation, _state: AppState) => {
+            switch (mutation.type) {
+              case 'playbackManager/PAUSE_PLAYBACK':
+                if (this.$refs.videoPlayer) {
+                  (this.$refs.videoPlayer as HTMLVideoElement).pause();
                 }
-              }
+
+                break;
+              case 'playbackManager/UNPAUSE_PLAYBACK':
+                if (this.$refs.videoPlayer) {
+                  (this.$refs.videoPlayer as HTMLVideoElement).play();
+                }
+
+                break;
+              case 'playbackManager/CHANGE_CURRENT_TIME':
+                if (this.$refs.videoPlayer && mutation?.payload?.time) {
+                  (this.$refs.videoPlayer as HTMLVideoElement).currentTime =
+                    mutation?.payload?.time;
+                }
+
+                break;
+              case 'playbackManager/SET_REPEAT_MODE':
+                if (this.$refs.videoPlayer) {
+                  if (mutation?.payload?.mode === RepeatMode.RepeatOne) {
+                    (this.$refs.videoPlayer as HTMLVideoElement).loop = true;
+                  } else {
+                    (this.$refs.videoPlayer as HTMLVideoElement).loop = false;
+                  }
+                }
+            }
           }
-        });
+        );
       } else {
         this.$nuxt.error({
           message: this.$t('browserNotSupported')
@@ -138,6 +146,8 @@ export default Vue.extend({
       this.player.unload();
       this.player.destroy();
     }
+
+    this.unsubscribe();
   },
   methods: {
     ...mapActions('snackbar', ['pushSnackbarMessage']),
@@ -163,6 +173,7 @@ export default Vue.extend({
         this.setPlaySessionId({ id: this.playbackInfo.PlaySessionId });
 
         let mediaSource;
+
         if (this.playbackInfo?.MediaSources) {
           mediaSource = this.playbackInfo.MediaSources[0];
           this.setMediaSource({ mediaSource });
@@ -190,6 +201,7 @@ export default Vue.extend({
           }
 
           const params = stringify(directOptions);
+
           this.source = `${this.$axios.defaults.baseURL}/Videos/${mediaSource.Id}/stream.${mediaSource.Container}?${params}`;
         } else if (
           mediaSource.SupportsTranscoding &&
@@ -219,6 +231,7 @@ export default Vue.extend({
       if (this.$refs.videoPlayer) {
         const currentTime = (this.$refs.videoPlayer as HTMLVideoElement)
           .currentTime;
+
         this.setCurrentTime({ time: currentTime });
         this.pause();
       }
@@ -227,6 +240,7 @@ export default Vue.extend({
       if (this.$refs.videoPlayer) {
         const currentTime = (this.$refs.videoPlayer as HTMLVideoElement)
           .currentTime;
+
         this.setCurrentTime({ time: currentTime });
         this.setNextTrack();
       }

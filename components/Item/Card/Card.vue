@@ -58,11 +58,12 @@
           v-if="overlay && !$browser.isMobile()"
           class="card-overlay d-flex justify-center align-center"
         >
-          <play-button fab :item="item" />
+          <play-button fab :items="[item]" />
           <div
             v-if="overlay"
             class="card-lower-buttons d-flex justify-center align-center"
           >
+            <mark-played-button :item="item" dark />
             <like-button v-if="canPlay(item)" :item="item" dark />
             <item-menu :item="item" dark />
           </div>
@@ -70,7 +71,15 @@
       </div>
       <div v-if="text" class="card-text">
         <div class="card-title mt-1 text-truncate">{{ cardTitle }}</div>
-        <div class="card-subtitle text--secondary text-truncate">
+        <nuxt-link
+          v-if="item.Type === 'MusicAlbum'"
+          tag="div"
+          class="card-subtitle text--secondary text-truncate link"
+          :to="getItemDetailsLink(item.AlbumArtists[0], 'MusicArtist')"
+        >
+          {{ cardSubtitle }}
+        </nuxt-link>
+        <div v-else class="card-subtitle text--secondary text-truncate">
           {{ cardSubtitle }}
         </div>
       </div>
@@ -148,7 +157,9 @@ export default Vue.extend({
     cardTitle(): string {
       if (this.item.Type !== 'Episode') {
         return this.item.Name || '';
-      } else return this.item.SeriesName || '';
+      } else {
+        return this.item.SeriesName || '';
+      }
     },
     /**
      * @returns {string} Either a string representing the production year(s) for the current item
@@ -172,17 +183,21 @@ export default Vue.extend({
               'en-us',
               { year: 'numeric' }
             );
+
             if (this.item.ProductionYear?.toString() === endYear) {
               return this.item.ProductionYear.toString();
             }
+
             return `${this.item.ProductionYear} - ${endYear}`;
           }
+
           break;
         }
         case 'Movie':
         default:
           return `${this.item.ProductionYear ? this.item.ProductionYear : ''}`;
       }
+
       return '';
     },
     progress: {
